@@ -1128,10 +1128,106 @@ footer {
 
 .master-section {
     margin-bottom: 1.2rem;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 16px;
-    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    padding: 14px 18px;
     border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.master-header {
+    margin-bottom: 12px;
+}
+
+.master-title {
+    color: var(--neon-green);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.master-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+}
+
+.slider-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 120px;
+    max-width: 160px;
+}
+
+.slider-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--slider-color, var(--neon-cyan));
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.slider-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+}
+
+.slider-track:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.slider-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--slider-color, var(--neon-cyan)), var(--slider-color-light, var(--neon-cyan)));
+    border-radius: 4px;
+    box-shadow: 0 0 10px var(--slider-glow, rgba(0, 245, 255, 0.4));
+    transition: width 0.1s;
+}
+
+.slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px var(--slider-color, var(--neon-cyan)), 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s;
+}
+
+.slider-thumb:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+}
+
+.slider-value {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 3px 12px;
+    border-radius: 10px;
 }
 
 .master-header {
