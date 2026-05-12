@@ -2,8 +2,6 @@
 
 Визуальный секвенсор битов — создавай ритмы, нажимая на ячейки сетки.
 
-## Возможности
-
 **Звуковая библиотека**
 - 8 дорожек: Kick, Snare, Hi-Hat, Clap, Tom, Perc, Bass, Synth
 - 48 уникальных звуков с FM-синтезом
@@ -41,34 +39,5 @@
 
 ## Запуск
 
-Открой `index.html` в браузере (Chrome, Firefox, Edge).
+Открой `index.html` в браузере
 
-```bash
-# Или через локальный сервер
-python -m http.server 8000
-# Открой http://localhost:8000
-```
-
-## Структура
-
-```
-Bro-Grid-Beat/
-├── index.html      # Главная страница
-├── css/
-│   └── style.css   # Стили
-├── js/
-│   └── main.js     # Логика приложения
-└── assets/         # Ресурсы
-```
-
-## Технологии
-
-- HTML5 + CSS3 (Cyberpunk Neon UI)
-- Vanilla JavaScript
-- Web Audio API (FM-синтез, эффекты)
-- Canvas 2D (визуализация)
-
----
-
-**Версия:** 1.2  
-**Контакт:** seevaa57@gmail.com
