@@ -12,8 +12,6 @@
     <div class="bg-glow"></div>
     
     <div class="sequencer-container">
-        <div class="scan-line"></div>
-        
         <div class="header">
             <h1>BRO-GRID-BEAT</h1>
             <div class="subtitle">// rhythm sequencer //</div>
@@ -31,108 +29,34 @@
                 <div class="master-title">◈ MASTER CONTROLS</div>
             </div>
             <div class="master-container">
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-master" style="--knob-color: #00ff88; --knob-glow: rgba(0, 255, 136, 0.5);">
-                            <input type="range" class="knob-input" id="masterVolume" min="0" max="100" value="80">
-                            <div class="knob-indicator" id="masterVolumeIndicator"></div>
-                        </div>
+                <div class="slider-control" style="--slider-color: #00ff88; --slider-color-light: #00ffaa; --slider-glow: rgba(0, 255, 136, 0.5);">
+                    <div class="slider-label">MASTER</div>
+                    <div class="slider-track">
+                        <div class="slider-fill" id="masterFill"></div>
+                        <div class="slider-thumb" id="masterThumb"></div>
+                        <input type="range" class="slider-input" id="masterVolume" min="0" max="100" value="80">
                     </div>
-                    <div class="knob-value" id="masterVolumeValue">80%</div>
-                    <div class="knob-label">MASTER</div>
+                    <div class="slider-value" id="masterVolumeValue">80%</div>
                 </div>
                 
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-bass" style="--knob-color: #ff6600; --knob-glow: rgba(255, 102, 0, 0.5);">
-                            <input type="range" class="knob-input" id="bassBoost" min="-12" max="12" value="0">
-                            <div class="knob-indicator" id="bassBoostIndicator"></div>
-                        </div>
+                <div class="slider-control" style="--slider-color: #ff6600; --slider-color-light: #ff8844; --slider-glow: rgba(255, 102, 0, 0.5);">
+                    <div class="slider-label">BASS</div>
+                    <div class="slider-track">
+                        <div class="slider-fill" id="bassFill"></div>
+                        <div class="slider-thumb" id="bassThumb"></div>
+                        <input type="range" class="slider-input" id="bassBoost" min="-12" max="12" value="0">
                     </div>
-                    <div class="knob-value" id="bassBoostValue">0 dB</div>
-                    <div class="knob-label">BASS</div>
+                    <div class="slider-value" id="bassBoostValue">0 dB</div>
                 </div>
                 
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-treble" style="--knob-color: #00f5ff; --knob-glow: rgba(0, 245, 255, 0.5);">
-                            <input type="range" class="knob-input" id="trebleBoost" min="-12" max="12" value="0">
-                            <div class="knob-indicator" id="trebleBoostIndicator"></div>
-                        </div>
+                <div class="slider-control" style="--slider-color: #00f5ff; --slider-color-light: #44ffff; --slider-glow: rgba(0, 245, 255, 0.5);">
+                    <div class="slider-label">COMP</div>
+                    <div class="slider-track">
+                        <div class="slider-fill" id="compFill"></div>
+                        <div class="slider-thumb" id="compThumb"></div>
+                        <input type="range" class="slider-input" id="compressor" min="0" max="100" value="0">
                     </div>
-                    <div class="knob-value" id="trebleBoostValue">0 dB</div>
-                    <div class="knob-label">TREBLE</div>
-                </div>
-                
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-attack" style="--knob-color: #ff00aa; --knob-glow: rgba(255, 0, 170, 0.5);">
-                            <input type="range" class="knob-input" id="attackTime" min="1" max="100" value="50">
-                            <div class="knob-indicator" id="attackTimeIndicator"></div>
-                        </div>
-                    </div>
-                    <div class="knob-value" id="attackTimeValue">50ms</div>
-                    <div class="knob-label">ATTACK</div>
-                </div>
-                
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-release" style="--knob-color: #f0ff00; --knob-glow: rgba(240, 255, 0, 0.5);">
-                            <input type="range" class="knob-input" id="releaseTime" min="10" max="500" value="150">
-                            <div class="knob-indicator" id="releaseTimeIndicator"></div>
-                        </div>
-                    </div>
-                    <div class="knob-value" id="releaseTimeValue">150ms</div>
-                    <div class="knob-label">RELEASE</div>
-                </div>
-                
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-comp" style="--knob-color: #ff3366; --knob-glow: rgba(255, 51, 102, 0.5);">
-                            <input type="range" class="knob-input" id="compressor" min="0" max="100" value="0">
-                            <div class="knob-indicator" id="compressorIndicator"></div>
-                        </div>
-                    </div>
-                    <div class="knob-value" id="compressorValue">OFF</div>
-                    <div class="knob-label">COMP</div>
-                </div>
-                
-                <div class="knob-container">
-                    <div class="knob-wrapper">
-                        <div class="knob" id="knob-drive" style="--knob-color: #b400ff; --knob-glow: rgba(180, 0, 255, 0.5);">
-                            <input type="range" class="knob-input" id="driveAmount" min="0" max="100" value="0">
-                            <div class="knob-indicator" id="driveIndicator"></div>
-                        </div>
-                    </div>
-                    <div class="knob-value" id="driveValue">OFF</div>
-                    <div class="knob-label">DRIVE</div>
-                </div>
-            </div>
-            
-            <div class="equalizer-container" id="equalizer">
-                <div class="eq-band">
-                    <div class="eq-label">SUB</div>
-                    <input type="range" class="eq-slider" id="eq-sub" min="0" max="100" value="50">
-                </div>
-                <div class="eq-band">
-                    <div class="eq-label">BASS</div>
-                    <input type="range" class="eq-slider" id="eq-bass" min="0" max="100" value="50">
-                </div>
-                <div class="eq-band">
-                    <div class="eq-label">LOW</div>
-                    <input type="range" class="eq-slider" id="eq-low" min="0" max="100" value="50">
-                </div>
-                <div class="eq-band">
-                    <div class="eq-label">MID</div>
-                    <input type="range" class="eq-slider" id="eq-mid" min="0" max="100" value="50">
-                </div>
-                <div class="eq-band">
-                    <div class="eq-label">HIGH</div>
-                    <input type="range" class="eq-slider" id="eq-high" min="0" max="100" value="50">
-                </div>
-                <div class="eq-band">
-                    <div class="eq-label">PRES</div>
-                    <input type="range" class="eq-slider" id="eq-pres" min="0" max="100" value="50">
+                    <div class="slider-value" id="compressorValue">OFF</div>
                 </div>
             </div>
         </div>
@@ -187,6 +111,7 @@
         </div>
 
         <div class="grid-wrapper">
+            <div class="step-numbers" id="stepNumbers"></div>
             <div class="step-grid-wrapper">
                 <div class="track-labels" id="trackLabels"></div>
                 <div id="grid" class="step-grid"></div>
