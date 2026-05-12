@@ -911,6 +911,7 @@
     function loadPreset(preset) {
         pattern = preset.pattern.map(row => [...row]);
         updateGridUI();
+        buildStepNumbers();
         showNotification(`Loaded: ${preset.name}`, preset.color);
         
         if (audioCtx && audioCtx.state !== 'closed') {
@@ -1083,6 +1084,8 @@
                         div.style.background = '';
                         div.style.boxShadow = '';
                     }
+                    
+                    buildStepNumbers();
                 });
                 
                 gridContainer.appendChild(div);
@@ -1265,6 +1268,54 @@
         }
     }
     
+    function buildStepNumbers() {
+        const container = document.getElementById('stepNumbers');
+        container.innerHTML = '';
+        container.style.display = 'flex';
+        container.style.gap = '5px';
+        container.style.marginBottom = '8px';
+        container.style.marginLeft = '58px';
+        
+        for (let i = 0; i < STEPS; i++) {
+            const num = document.createElement('div');
+            num.className = 'step-number';
+            num.id = `step-num-${i}`;
+            
+            const hasNotes = pattern.some(row => row[i]);
+            if (hasNotes) {
+                num.textContent = i + 1;
+            } else {
+                num.textContent = '';
+                num.style.opacity = '0.2';
+            }
+            
+            container.appendChild(num);
+        }
+    }
+    
+    function updateStepNumbers(step) {
+        for (let i = 0; i < STEPS; i++) {
+            const num = document.getElementById(`step-num-${i}`);
+            if (num) {
+                num.classList.remove('playing', 'beat-1');
+                num.style.background = '';
+                num.style.boxShadow = '';
+                
+                if (i === step) {
+                    num.style.background = 'rgba(0, 245, 255, 0.2)';
+                    num.style.boxShadow = '0 0 15px rgba(0, 245, 255, 0.5)';
+                    num.style.borderRadius = '4px';
+                    num.style.padding = '4px 8px';
+                    
+                    if (step % 4 === 0) {
+                        num.style.background = 'rgba(255, 0, 170, 0.2)';
+                        num.style.boxShadow = '0 0 15px rgba(255, 0, 170, 0.5)';
+                    }
+                }
+            }
+        }
+    }
+    
     function updateBeatIndicator(step) {
         const dots = document.querySelectorAll('.beat-dot');
         dots.forEach((dot, i) => {
@@ -1297,6 +1348,7 @@
         if (activeRows.length > 0) triggerVisualizerHit(activeRows);
         
         updateBeatIndicator(currentStep);
+        updateStepNumbers(currentStep);
         currentStep = (currentStep + 1) % STEPS;
     }
     
@@ -1325,6 +1377,7 @@
         document.getElementById('playBtn').textContent = 'PLAY';
         cellsElements.forEach(el => el.classList.remove('playing'));
         updateBeatIndicator(-1);
+        updateStepNumbers(-1);
     }
     
     function togglePlayback() {
@@ -1354,6 +1407,7 @@
             el.style.boxShadow = '';
         });
         document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+        buildStepNumbers();
         showNotification('Pattern cleared', '#ff00aa');
     }
     
@@ -1364,6 +1418,7 @@
         buildTrackLabels();
         buildGridUI();
         buildBeatIndicator();
+        buildStepNumbers();
         buildMixerUI();
         buildEffectsUI();
         initKnobControls();
