@@ -159,19 +159,7 @@
     const masterControls = {
         masterVolume: 0.8,
         bassBoost: 0,
-        trebleBoost: 0,
-        attackTime: 0.05,
-        releaseTime: 0.15,
-        compressor: 0,
-        driveAmount: 0,
-        eq: {
-            sub: 50,
-            bass: 50,
-            low: 50,
-            mid: 50,
-            high: 50,
-            presence: 50
-        }
+        compressor: 0
     };
     
     const canvas = document.getElementById('spectrumCanvas');
@@ -203,16 +191,11 @@
         compressorNode.threshold.value = -24;
         compressorNode.knee.value = 30;
         compressorNode.ratio.value = 4;
-        compressorNode.attack.value = masterControls.attackTime;
-        compressorNode.release.value = masterControls.releaseTime;
+        compressorNode.attack.value = 0.003;
+        compressorNode.release.value = 0.25;
         
         distortionNode = audioCtx.createWaveShaper();
-        distortionNode.curve = makeDistortionCurve(0);
-        
-        eqFilters.sub = audioCtx.createBiquadFilter();
-        eqFilters.sub.type = 'lowshelf';
-        eqFilters.sub.frequency.value = 60;
-        eqFilters.sub.gain.value = 0;
+        distortionNode.curve = null;
         
         eqFilters.bass = audioCtx.createBiquadFilter();
         eqFilters.bass.type = 'peaking';
@@ -220,56 +203,16 @@
         eqFilters.bass.Q.value = 1;
         eqFilters.bass.gain.value = 0;
         
-        eqFilters.low = audioCtx.createBiquadFilter();
-        eqFilters.low.type = 'peaking';
-        eqFilters.low.frequency.value = 400;
-        eqFilters.low.Q.value = 1;
-        eqFilters.low.gain.value = 0;
-        
-        eqFilters.mid = audioCtx.createBiquadFilter();
-        eqFilters.mid.type = 'peaking';
-        eqFilters.mid.frequency.value = 1000;
-        eqFilters.mid.Q.value = 1;
-        eqFilters.mid.gain.value = 0;
-        
-        eqFilters.high = audioCtx.createBiquadFilter();
-        eqFilters.high.type = 'peaking';
-        eqFilters.high.frequency.value = 4000;
-        eqFilters.high.Q.value = 1;
-        eqFilters.high.gain.value = 0;
-        
-        eqFilters.presence = audioCtx.createBiquadFilter();
-        eqFilters.presence.type = 'highshelf';
-        eqFilters.presence.frequency.value = 8000;
-        eqFilters.presence.gain.value = 0;
-        
-        masterGain.connect(eqFilters.sub);
-        eqFilters.sub.connect(eqFilters.bass);
-        eqFilters.bass.connect(eqFilters.low);
-        eqFilters.low.connect(eqFilters.mid);
-        eqFilters.mid.connect(eqFilters.high);
-        eqFilters.high.connect(eqFilters.presence);
+        masterGain.connect(eqFilters.bass);
         
         if (masterControls.compressor > 0) {
-            eqFilters.presence.connect(compressorNode);
+            eqFilters.bass.connect(compressorNode);
             compressorNode.connect(distortionNode);
         } else {
-            eqFilters.presence.connect(distortionNode);
+            eqFilters.bass.connect(distortionNode);
         }
         
         distortionNode.connect(audioCtx.destination);
-    }
-    
-    function makeDistortionCurve(amount) {
-        if (amount === 0) return null;
-        const samples = 44100;
-        const curve = new Float32Array(samples);
-        const deg = Math.PI / 180;
-        for (let i = 0; i < samples; i++) {
-            const x = (i * 2) / samples - 1;
-            curve[i] = ((3 + amount * 100) * x * 20 * deg) / (Math.PI + amount * 100 * Math.abs(x));
-        }
-        return curve;
     }
     
     function updateMasterControls() {
@@ -277,110 +220,56 @@
         
         masterGain.gain.value = masterControls.masterVolume;
         
-        eqFilters.sub.gain.value = (masterControls.eq.sub - 50) * 0.48;
-        eqFilters.bass.gain.value = (masterControls.eq.bass - 50) * 0.48;
-        eqFilters.low.gain.value = (masterControls.eq.low - 50) * 0.48;
-        eqFilters.mid.gain.value = (masterControls.eq.mid - 50) * 0.48;
-        eqFilters.high.gain.value = (masterControls.eq.high - 50) * 0.48;
-        eqFilters.presence.gain.value = (masterControls.eq.presence - 50) * 0.48;
-        
-        compressorNode.attack.value = masterControls.attackTime / 1000;
-        compressorNode.release.value = masterControls.releaseTime / 1000;
         compressorNode.threshold.value = -24 - (masterControls.compressor * 0.36);
         compressorNode.ratio.value = 1 + (masterControls.compressor * 0.12);
-        
-        distortionNode.curve = makeDistortionCurve(masterControls.driveAmount);
-    }
-    
-    function updateKnobIndicator(knobId, value, min, max) {
-        const indicator = document.getElementById(knobId);
-        if (!indicator) return;
-        
-        const normalized = (value - min) / (max - min);
-        const angle = -135 + (normalized * 270);
-        indicator.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
     }
     
     function initKnobControls() {
         const masterVolume = document.getElementById('masterVolume');
+        const masterFill = document.getElementById('masterFill');
+        const masterThumb = document.getElementById('masterThumb');
+        
         masterVolume.addEventListener('input', (e) => {
             const val = parseInt(e.target.value);
             masterControls.masterVolume = val / 100;
             document.getElementById('masterVolumeValue').textContent = val + '%';
-            updateKnobIndicator('masterVolumeIndicator', val, 0, 100);
+            masterFill.style.width = val + '%';
+            masterThumb.style.left = `calc(${val}% - 9px)`;
             updateMasterControls();
         });
+        masterFill.style.width = '80%';
+        masterThumb.style.left = 'calc(80% - 9px)';
         
         const bassBoost = document.getElementById('bassBoost');
+        const bassFill = document.getElementById('bassFill');
+        const bassThumb = document.getElementById('bassThumb');
+        
         bassBoost.addEventListener('input', (e) => {
             const val = parseInt(e.target.value);
             masterControls.bassBoost = val;
             document.getElementById('bassBoostValue').textContent = val + ' dB';
-            updateKnobIndicator('bassBoostIndicator', val + 12, -12, 12);
-            eqFilters.bass.frequency.value = 150;
+            const percent = ((val + 12) / 24) * 100;
+            bassFill.style.width = percent + '%';
+            bassThumb.style.left = `calc(${percent}% - 9px)`;
             eqFilters.bass.gain.value = val;
         });
-        
-        const trebleBoost = document.getElementById('trebleBoost');
-        trebleBoost.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            masterControls.trebleBoost = val;
-            document.getElementById('trebleBoostValue').textContent = val + ' dB';
-            updateKnobIndicator('trebleBoostIndicator', val + 12, -12, 12);
-            eqFilters.high.gain.value = val;
-        });
-        
-        const attackTime = document.getElementById('attackTime');
-        attackTime.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            masterControls.attackTime = val;
-            document.getElementById('attackTimeValue').textContent = val + 'ms';
-            updateKnobIndicator('attackTimeIndicator', val, 1, 100);
-            updateMasterControls();
-        });
-        
-        const releaseTime = document.getElementById('releaseTime');
-        releaseTime.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            masterControls.releaseTime = val;
-            document.getElementById('releaseTimeValue').textContent = val + 'ms';
-            updateKnobIndicator('releaseTimeIndicator', val, 10, 500);
-            updateMasterControls();
-        });
+        bassFill.style.width = '50%';
+        bassThumb.style.left = 'calc(50% - 9px)';
         
         const compressor = document.getElementById('compressor');
+        const compFill = document.getElementById('compFill');
+        const compThumb = document.getElementById('compThumb');
+        
         compressor.addEventListener('input', (e) => {
             const val = parseInt(e.target.value);
             masterControls.compressor = val;
             document.getElementById('compressorValue').textContent = val === 0 ? 'OFF' : val + '%';
-            updateKnobIndicator('compressorIndicator', val, 0, 100);
+            compFill.style.width = val + '%';
+            compThumb.style.left = `calc(${val}% - 9px)`;
             updateMasterControls();
         });
-        
-        const driveAmount = document.getElementById('driveAmount');
-        driveAmount.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            masterControls.driveAmount = val;
-            document.getElementById('driveValue').textContent = val === 0 ? 'OFF' : val + '%';
-            updateKnobIndicator('driveIndicator', val, 0, 100);
-            updateMasterControls();
-        });
-        
-        ['sub', 'bass', 'low', 'mid', 'high', 'pres'].forEach(band => {
-            const slider = document.getElementById('eq-' + band);
-            slider.addEventListener('input', (e) => {
-                masterControls.eq[band] = parseInt(e.target.value);
-                updateMasterControls();
-            });
-        });
-        
-        updateKnobIndicator('masterVolumeIndicator', 80, 0, 100);
-        updateKnobIndicator('bassBoostIndicator', 12, -12, 12);
-        updateKnobIndicator('trebleBoostIndicator', 12, -12, 12);
-        updateKnobIndicator('attackTimeIndicator', 50, 1, 100);
-        updateKnobIndicator('releaseTimeIndicator', 150, 10, 500);
-        updateKnobIndicator('compressorIndicator', 0, 0, 100);
-        updateKnobIndicator('driveIndicator', 0, 0, 100);
+        compFill.style.width = '0%';
+        compThumb.style.left = '-9px';
     }
     
     function initEffects() {
