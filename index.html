@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BRO-GRID-BEAT</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23050510' width='100' height='100' rx='20'/><path d='M25 50 Q25 30 40 30 L65 20 L65 80 L40 70 Q25 70 25 50 Z' fill='%2300f5ff'/><rect x='70' y='35' width='8' height='30' rx='4' fill='%23ff00aa'/><circle cx='85' cy='50' r='5' fill='%23f0ff00'/></svg>">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    
+    <div class="sequencer-container">
+        <div class="scan-line"></div>
+        
+        <div class="header">
+            <h1>BRO-GRID-BEAT</h1>
+            <div class="subtitle">// rhythm sequencer //</div>
+        </div>
+
+        <div class="visualizer-container">
+            <canvas id="spectrumCanvas"></canvas>
+            <div class="visualizer-glow"></div>
+        </div>
+
+        <div class="notification" id="notification"></div>
+
+        <div class="master-section">
+            <div class="master-header">
+                <div class="master-title">◈ MASTER CONTROLS</div>
+            </div>
+            <div class="master-container">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-master" style="--knob-color: #00ff88; --knob-glow: rgba(0, 255, 136, 0.5);">
+                            <input type="range" class="knob-input" id="masterVolume" min="0" max="100" value="80">
+                            <div class="knob-indicator" id="masterVolumeIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="masterVolumeValue">80%</div>
+                    <div class="knob-label">MASTER</div>
+                </div>
+                
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-bass" style="--knob-color: #ff6600; --knob-glow: rgba(255, 102, 0, 0.5);">
+                            <input type="range" class="knob-input" id="bassBoost" min="-12" max="12" value="0">
+                            <div class="knob-indicator" id="bassBoostIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="bassBoostValue">0 dB</div>
+                    <div class="knob-label">BASS</div>
+                </div>
+                
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-treble" style="--knob-color: #00f5ff; --knob-glow: rgba(0, 245, 255, 0.5);">
+                            <input type="range" class="knob-input" id="trebleBoost" min="-12" max="12" value="0">
+                            <div class="knob-indicator" id="trebleBoostIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="trebleBoostValue">0 dB</div>
+                    <div class="knob-label">TREBLE</div>
+                </div>
+                
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-attack" style="--knob-color: #ff00aa; --knob-glow: rgba(255, 0, 170, 0.5);">
+                            <input type="range" class="knob-input" id="attackTime" min="1" max="100" value="50">
+                            <div class="knob-indicator" id="attackTimeIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="attackTimeValue">50ms</div>
+                    <div class="knob-label">ATTACK</div>
+                </div>
+                
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-release" style="--knob-color: #f0ff00; --knob-glow: rgba(240, 255, 0, 0.5);">
+                            <input type="range" class="knob-input" id="releaseTime" min="10" max="500" value="150">
+                            <div class="knob-indicator" id="releaseTimeIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="releaseTimeValue">150ms</div>
+                    <div class="knob-label">RELEASE</div>
+                </div>
+                
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-comp" style="--knob-color: #ff3366; --knob-glow: rgba(255, 51, 102, 0.5);">
+                            <input type="range" class="knob-input" id="compressor" min="0" max="100" value="0">
+                            <div class="knob-indicator" id="compressorIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="compressorValue">OFF</div>
+                    <div class="knob-label">COMP</div>
+                </div>
+                
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" id="knob-drive" style="--knob-color: #b400ff; --knob-glow: rgba(180, 0, 255, 0.5);">
+                            <input type="range" class="knob-input" id="driveAmount" min="0" max="100" value="0">
+                            <div class="knob-indicator" id="driveIndicator"></div>
+                        </div>
+                    </div>
+                    <div class="knob-value" id="driveValue">OFF</div>
+                    <div class="knob-label">DRIVE</div>
+                </div>
+            </div>
+            
+            <div class="equalizer-container" id="equalizer">
+                <div class="eq-band">
+                    <div class="eq-label">SUB</div>
+                    <input type="range" class="eq-slider" id="eq-sub" min="0" max="100" value="50">
+                </div>
+                <div class="eq-band">
+                    <div class="eq-label">BASS</div>
+                    <input type="range" class="eq-slider" id="eq-bass" min="0" max="100" value="50">
+                </div>
+                <div class="eq-band">
+                    <div class="eq-label">LOW</div>
+                    <input type="range" class="eq-slider" id="eq-low" min="0" max="100" value="50">
+                </div>
+                <div class="eq-band">
+                    <div class="eq-label">MID</div>
+                    <input type="range" class="eq-slider" id="eq-mid" min="0" max="100" value="50">
+                </div>
+                <div class="eq-band">
+                    <div class="eq-label">HIGH</div>
+                    <input type="range" class="eq-slider" id="eq-high" min="0" max="100" value="50">
+                </div>
+                <div class="eq-band">
+                    <div class="eq-label">PRES</div>
+                    <input type="range" class="eq-slider" id="eq-pres" min="0" max="100" value="50">
+                </div>
+            </div>
+        </div>
+
+        <div class="preset-section">
+            <div class="preset-header">
+                <div class="preset-title">◈ BEAT PRESETS</div>
+                <button class="preset-btn-small" id="helpBtn">❓ HELP</button>
+            </div>
+            <div class="preset-grid" id="presetGrid"></div>
+        </div>
+
+        <div class="help-modal" id="helpModal">
+            <div class="help-content">
+                <div class="help-header">
+                    <div class="help-title">🎯 HOW TO USE</div>
+                    <button class="help-close" id="helpClose">×</button>
+                </div>
+                <div id="helpTooltip"></div>
+            </div>
+        </div>
+
+        <div class="mixer-section">
+            <div class="mixer-header">
+                <div class="mixer-title">◈ MIXER</div>
+                <button class="toggle-btn" id="mixerToggleBtn">▲ HIDE</button>
+            </div>
+            <div class="channels-container" id="mixerChannels"></div>
+        </div>
+
+        <div class="effects-section">
+            <div class="effects-header">
+                <div class="effects-title">◈ EFFECTS</div>
+                <button class="toggle-btn" id="effectsToggleBtn">▲ HIDE</button>
+            </div>
+            <div class="effects-container">
+                <div class="effect-unit">
+                    <div class="effect-name">
+                        REVERB
+                        <div class="effect-toggle" id="reverb-toggle"></div>
+                    </div>
+                    <div id="reverb-params"></div>
+                </div>
+                <div class="effect-unit">
+                    <div class="effect-name">
+                        DELAY
+                        <div class="effect-toggle" id="delay-toggle"></div>
+                    </div>
+                    <div id="delay-params"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-wrapper">
+            <div class="step-grid-wrapper">
+                <div class="track-labels" id="trackLabels"></div>
+                <div id="grid" class="step-grid"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="playBtn" class="play-btn">▶ PLAY</button>
+            <button id="stopBtn" class="stop-btn">◼ STOP</button>
+            <button id="clearBtn" class="clear-btn">✕ CLEAR</button>
+            <button id="mixerToggleBtn" class="mixer-btn">◈ MIXER</button>
+            <button id="effectsToggleBtn" class="fx-btn">◈ FX</button>
+            <div class="bpm-control">
+                <label>BPM</label>
+                <input type="number" id="bpmInput" value="128" step="5" min="60" max="200">
+            </div>
+        </div>
+
+        <div class="beat-indicator" id="beatIndicator"></div>
+
+        <footer>v1.2 // seevaa57@gmail.com</footer>
+    </div>
+
+    <div class="sound-picker-modal" id="soundPickerModal">
+        <div class="sound-picker-content">
+            <div class="sound-picker-header">
+                <div class="sound-picker-title">🎵 SELECT SOUND</div>
+                <button class="sound-picker-close" id="soundPickerClose">×</button>
+            </div>
+            <div id="soundPickerContent"></div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
