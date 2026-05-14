@@ -547,3 +547,10 @@ function playSoundByType(audioCtx, panner, type, params, volume, now) {
         case 'synth': playSynth(audioCtx, panner, params, volume, now); break;
     }
 }
+
+if (typeof window !== 'undefined') {
+    window.SOUND_LIBRARY = SOUND_LIBRARY;
+    window.COLORS = COLORS;
+    window.PRESETS = PRESETS;
+    window.playSoundByType = playSoundByType;
+}
