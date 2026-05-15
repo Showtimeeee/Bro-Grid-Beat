@@ -7,6 +7,9 @@
     let masterControls, canvas, ctx, cellsElements, particles, visualizerTimeout;
     let SOUND_LIBRARY, COLORS, PRESETS, TRACK_DEFAULTS;
     
+    var nextStepTime = 0;
+    var swingOffset = 0;
+    
     function initApp() {
         SOUND_LIBRARY = window.SOUND_LIBRARY;
         COLORS = window.COLORS;
@@ -48,8 +51,12 @@
         masterControls = {
             masterVolume: 0.8,
             bassBoost: 0,
-            compressor: 0
+            compressor: 0,
+            swing: 0
         };
+        
+        nextStepTime = 0;
+        swingOffset = 0;
         
         canvas = document.getElementById('spectrumCanvas');
         ctx = canvas.getContext('2d');
@@ -98,11 +105,16 @@
             if (e.target === document.getElementById('helpModal')) document.getElementById('helpModal').classList.remove('visible');
         });
         
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', function(e) {
             if (e.code === 'Space') {
                 e.preventDefault();
                 togglePlayback();
             }
+        });
+        
+        document.getElementById('swingInput').addEventListener('input', function(e) {
+            masterControls.swing = parseInt(e.target.value);
+            document.getElementById('swingValue').textContent = masterControls.swing + '%';
         });
         
         let idleTimeout = null;
@@ -968,30 +980,97 @@
         });
     }
     
+    function getSwingOffset(step) {
+        if (masterControls.swing <= 0) return 0;
+        if (step % 2 === 1) {
+            var baseStepDuration = (60 / bpm) / 4;
+            return baseStepDuration * (masterControls.swing / 100) * 0.5;
+        }
+        return 0;
+    }
+    
     function stepSequencer() {
         if (!isPlaying) return;
         
-        var activeRows = [];
-        for (var row = 0; row < ROWS; row++) {
-            if (pattern[row][currentStep]) {
-                playSound(row);
-                activeRows.push(row);
-                
-                var idx = row * STEPS + currentStep;
-                var cell = cellsElements[idx];
-                if (cell) {
-                    cell.classList.add('playing');
-                    createParticles(row, currentStep, cell);
-                    setTimeout(function(c) { c.classList.remove('playing'); }, 100, cell);
+        var stepDuration = (60 / bpm) / 4;
+        var now = audioCtx.currentTime;
+        var scheduleAhead = 0.1;
+        
+        while (nextStepTime < now + scheduleAhead) {
+            var stepTime = nextStepTime + getSwingOffset(currentStep);
+            
+            for (var row = 0; row < ROWS; row++) {
+                if (pattern[row][currentStep]) {
+                    playSoundAtTime(row, stepTime);
+                    
+                    var idx = row * STEPS + currentStep;
+                    var cell = cellsElements[idx];
+                    if (cell) {
+                        setTimeout(function(c, r, s) {
+                            c.classList.add('playing');
+                            createParticles(r, s, c);
+                        }, Math.max(0, (stepTime - now) * 1000), cell, row, currentStep);
+                        setTimeout(function(c) { c.classList.remove('playing'); }, 100 + Math.max(0, (stepTime - now) * 1000), cell);
+                    }
                 }
             }
+            
+            updateBeatIndicator(currentStep);
+            updateStepNumbers(currentStep);
+            
+            nextStepTime += stepDuration;
+            currentStep = (currentStep + 1) % STEPS;
+        }
+    }
+    
+    function playSoundAtTime(row, time) {
+        if (channels[row].muted && hasSolo()) return;
+        
+        var ch = channels[row];
+        var soundKey = ch.soundKey;
+        var soundData = SOUND_LIBRARY[soundKey];
+        if (!soundData) return;
+        
+        var sound = soundData.sounds[ch.soundIndex];
+        
+        var gainNode = audioCtx.createGain();
+        var panner = audioCtx.createStereoPanner();
+        
+        gainNode.connect(panner);
+        
+        if (masterGain) {
+            panner.connect(masterGain);
+        } else {
+            panner.connect(audioCtx.destination);
         }
         
-        if (activeRows.length > 0) triggerVisualizerHit(activeRows);
+        var volume = ch.volume * 0.6;
         
-        updateBeatIndicator(currentStep);
-        updateStepNumbers(currentStep);
-        currentStep = (currentStep + 1) % STEPS;
+        window.playSoundByType(audioCtx, panner, sound.params.type, sound.params, volume, time);
+        
+        if (effects.delay.enabled && delayNode) {
+            var delayGain = audioCtx.createGain();
+            delayGain.gain.value = effects.delay.wet;
+            panner.connect(delayGain);
+            delayGain.connect(delayNode);
+            var delayOutput = audioCtx.createGain();
+            delayNode.connect(delayOutput);
+            if (masterGain) delayOutput.connect(masterGain);
+            else delayOutput.connect(audioCtx.destination);
+        }
+        
+        if (effects.reverb.enabled && reverbNode) {
+            var reverbGain = audioCtx.createGain();
+            reverbGain.gain.value = effects.reverb.wet;
+            panner.connect(reverbGain);
+            reverbGain.connect(reverbNode);
+            var reverbOutput = audioCtx.createGain();
+            reverbNode.connect(reverbOutput);
+            if (masterGain) reverbOutput.connect(masterGain);
+            else reverbOutput.connect(audioCtx.destination);
+        }
+        
+        triggerVisualizerHit([row]);
     }
     
     function startPlayback() {
@@ -999,12 +1078,14 @@
         initAudio();
         initEffects();
         isPlaying = true;
+        currentStep = 0;
+        nextStepTime = audioCtx.currentTime;
+        
         document.getElementById('playBtn').classList.add('playing');
         document.getElementById('playBtn').textContent = 'PAUSE';
         
         if (timerId) clearInterval(timerId);
-        var stepDuration = (60 / bpm) * 1000 / 4;
-        timerId = setInterval(stepSequencer, stepDuration);
+        timerId = setInterval(stepSequencer, 25);
     }
     
     function stopPlayback() {
@@ -1014,6 +1095,7 @@
         }
         isPlaying = false;
         currentStep = 0;
+        nextStepTime = 0;
         
         document.getElementById('playBtn').classList.remove('playing');
         document.getElementById('playBtn').textContent = 'PLAY';
