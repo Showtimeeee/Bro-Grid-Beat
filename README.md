@@ -1,14 +1,9 @@
 # BRO-GRID-BEAT
 
-Визуальный секвенсор битов — создавай ритмы, нажимая на ячейки сетки.
+<img width="649" height="630" alt="logo-beat" src="https://github.com/user-attachments/assets/09308e70-cbc7-498c-a893-6d924addbc5f" />
 
-8 дорожек: Kick, Snare, Hi-Hat, Clap, Tom, Perc, Bass, Synth
+Visual Bit Sequencer – Create rhythms by clicking on the grid cells (Kick, Snare, Hi-Hat, Clap, Tom, Perc, Bass, Synth)
 
-| Действие | Клавиша |
-|----------|---------|
-| Play / Pause | `SPACE` или кнопка |
-| Очистить паттерн | Кнопка CLEAR |
-| Изменить звук | Клик на название дорожки |
+---
 
-Открой `index.html` в браузере
-
+Open index.html in your browser.
