@@ -27,6 +27,7 @@
         <div class="master-section">
             <div class="master-header">
                 <div class="master-title">◈ MASTER CONTROLS</div>
+                <button id="tapBtn" class="tap-btn-master">◉ TAP</button>
             </div>
             <div class="master-container">
                 <div class="slider-control" style="--slider-color: #00ff88; --slider-color-light: #00ffaa; --slider-glow: rgba(0, 255, 136, 0.5);">
@@ -119,81 +120,14 @@
         </div>
 
         <div class="save-section">
-            <div class="save-header">◈ SAVE / LOAD</div>
-            <div class="save-grid" id="saveGrid">
-                <div class="save-slot" data-slot="0">
-                    <div class="save-slot-name">SLOT 1</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="1">
-                    <div class="save-slot-name">SLOT 2</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="2">
-                    <div class="save-slot-name">SLOT 3</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="3">
-                    <div class="save-slot-name">SLOT 4</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="4">
-                    <div class="save-slot-name">SLOT 5</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="5">
-                    <div class="save-slot-name">SLOT 6</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="6">
-                    <div class="save-slot-name">SLOT 7</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
-                </div>
-                <div class="save-slot" data-slot="7">
-                    <div class="save-slot-name">SLOT 8</div>
-                    <div class="save-slot-preview">Empty</div>
-                    <div class="save-slot-actions">
-                        <button class="save-btn" title="Save">💾</button>
-                        <button class="load-btn" title="Load">📂</button>
-                        <button class="del-btn" title="Delete">🗑️</button>
-                    </div>
+            <div class="save-header">
+                <span>◈ SAVE / LOAD</span>
+                <div class="save-header-actions">
+                    <button class="export-btn" id="exportBtn">📤 EXPORT</button>
+                    <button class="import-btn" id="importBtn">📥 IMPORT</button>
                 </div>
             </div>
+            <div class="save-grid" id="saveGrid"></div>
         </div>
 
         <div class="controls">
@@ -215,7 +149,7 @@
 
         <div class="beat-indicator" id="beatIndicator"></div>
 
-        <footer>v1.3 // seevaa57@gmail.com</footer>
+        <footer>v1.5 // seevaa57@gmail.com</footer>
     </div>
 
     <div class="sound-picker-modal" id="soundPickerModal">
