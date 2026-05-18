@@ -9,6 +9,7 @@
     
     var nextStepTime = 0;
     var swingOffset = 0;
+    var displayedStep = -1;
     
     function initApp() {
         SOUND_LIBRARY = window.SOUND_LIBRARY;
@@ -74,6 +75,8 @@
         buildMixerUI();
         buildEffectsUI();
         initKnobControls();
+        buildSaveGrid();
+        initSaveSlots();
         drawVisualizer([]);
         
         document.getElementById('playBtn').addEventListener('click', togglePlayback);
@@ -88,6 +91,8 @@
         document.getElementById('effectsToggleBtn').addEventListener('click', () => {
             document.querySelector('.effects-section').classList.toggle('visible');
         });
+        
+        initSaveSlots();
         
         document.getElementById('helpBtn').addEventListener('click', () => {
             document.getElementById('helpModal').classList.add('visible');
@@ -110,12 +115,17 @@
                 e.preventDefault();
                 togglePlayback();
             }
+            if (e.key === 't' || e.key === 'T') {
+                doTapBpm();
+            }
         });
         
         document.getElementById('swingInput').addEventListener('input', function(e) {
             masterControls.swing = parseInt(e.target.value);
             document.getElementById('swingValue').textContent = masterControls.swing + '%';
         });
+        
+        initTapBpm();
         
         let idleTimeout = null;
         
@@ -998,25 +1008,32 @@
         
         while (nextStepTime < now + scheduleAhead) {
             var stepTime = nextStepTime + getSwingOffset(currentStep);
+            var scheduledStep = currentStep;
             
             for (var row = 0; row < ROWS; row++) {
-                if (pattern[row][currentStep]) {
+                if (pattern[row][scheduledStep]) {
                     playSoundAtTime(row, stepTime);
                     
-                    var idx = row * STEPS + currentStep;
+                    var idx = row * STEPS + scheduledStep;
                     var cell = cellsElements[idx];
                     if (cell) {
-                        setTimeout(function(c, r, s) {
-                            c.classList.add('playing');
-                            createParticles(r, s, c);
-                        }, Math.max(0, (stepTime - now) * 1000), cell, row, currentStep);
-                        setTimeout(function(c) { c.classList.remove('playing'); }, 100 + Math.max(0, (stepTime - now) * 1000), cell);
+                        var delay = Math.max(0, (stepTime - now) * 1000);
+                        (function(c, r, s) {
+                            setTimeout(function() {
+                                c.classList.add('playing');
+                                createParticles(r, s, c);
+                            }, delay);
+                        })(cell, row, scheduledStep);
+                        setTimeout(function(c) { c.classList.remove('playing'); }, 100 + delay, cell);
                     }
                 }
             }
             
-            updateBeatIndicator(currentStep);
-            updateStepNumbers(currentStep);
+            if (scheduledStep !== displayedStep) {
+                displayedStep = scheduledStep;
+                updateBeatIndicator(scheduledStep);
+                updateStepNumbers(scheduledStep);
+            }
             
             nextStepTime += stepDuration;
             currentStep = (currentStep + 1) % STEPS;
@@ -1096,6 +1113,7 @@
         isPlaying = false;
         currentStep = 0;
         nextStepTime = 0;
+        displayedStep = -1;
         
         document.getElementById('playBtn').classList.remove('playing');
         document.getElementById('playBtn').textContent = 'PLAY';
@@ -1117,10 +1135,60 @@
         document.getElementById('bpmInput').value = bpm;
         
         if (isPlaying) {
-            clearInterval(timerId);
-            var stepDuration = (60 / bpm) * 1000 / 4;
-            timerId = setInterval(stepSequencer, stepDuration);
+            nextStepTime = audioCtx.currentTime;
         }
+    }
+    
+    function initTapBpm() {
+        var tapTimes = [];
+        var TAP_BUFFER = 5;
+        var tapBtn = document.getElementById('tapBtn');
+        
+        window.doTapBpm = function() {
+            var now = Date.now();
+            
+            if (tapTimes.length > 0) {
+                var lastTap = tapTimes[tapTimes.length - 1];
+                if (now - lastTap > 2000) {
+                    tapTimes = [];
+                }
+            }
+            
+            tapTimes.push(now);
+            
+            if (tapTimes.length > TAP_BUFFER) {
+                tapTimes.shift();
+            }
+            
+            if (tapTimes.length >= 3) {
+                var intervals = [];
+                for (var i = 1; i < tapTimes.length; i++) {
+                    intervals.push(tapTimes[i] - tapTimes[i - 1]);
+                }
+                
+                var sum = 0;
+                for (var j = 0; j < intervals.length; j++) {
+                    sum += intervals[j];
+                }
+                var avg = sum / intervals.length;
+                
+                var calculatedBpm = Math.round(60000 / avg);
+                calculatedBpm = Math.max(60, Math.min(200, calculatedBpm));
+                
+                setBPM(calculatedBpm);
+            }
+            
+            var flash = tapBtn.querySelector('.tap-flash');
+            if (!flash) {
+                flash = document.createElement('span');
+                flash.className = 'tap-flash';
+                tapBtn.appendChild(flash);
+            }
+            flash.className = 'tap-flash active';
+            setTimeout(function() { flash.className = 'tap-flash'; }, 200);
+        };
+        
+        tapBtn.addEventListener('click', window.doTapBpm);
     }
     
     function clearPattern() {
@@ -1133,6 +1201,128 @@
         document.querySelectorAll('.preset-card').forEach(function(c) { c.classList.remove('active'); });
         buildStepNumbers();
         showNotification('Pattern cleared', '#ff00aa');
+    }
+    
+    function buildSaveGrid() {
+        var grid = document.getElementById('saveGrid');
+        grid.innerHTML = '';
+        for (var i = 0; i < 8; i++) {
+            var slot = document.createElement('div');
+            slot.className = 'save-slot';
+            slot.dataset.slot = i;
+            slot.innerHTML = '' +
+                '<div class="save-slot-name">SLOT ' + (i + 1) + '</div>' +
+                '<div class="save-slot-preview">Empty</div>' +
+                '<div class="save-slot-actions">' +
+                    '<button class="save-btn" title="Save">💾</button>' +
+                    '<button class="load-btn" title="Load">📂</button>' +
+                    '<button class="del-btn" title="Delete">🗑️</button>' +
+                '</div>';
+            grid.appendChild(slot);
+        }
+        updateSaveSlots();
+    }
+    
+    function initSaveSlots() {
+        document.querySelectorAll('.save-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                var slot = parseInt(e.target.closest('.save-slot').dataset.slot);
+                var currentPattern = pattern.map(function(r) { return r.slice(); });
+                var name = prompt('Save pattern as:', 'My Pattern ' + (slot + 1));
+                if (name !== null) {
+                    Storage.savePattern(slot, currentPattern, name || ('Slot ' + (slot + 1)));
+                    updateSaveSlots();
+                    showNotification('Saved: ' + (name || 'Slot ' + (slot + 1)), '#00ff88');
+                }
+            });
+        });
+        
+        document.querySelectorAll('.load-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                var slot = parseInt(e.target.closest('.save-slot').dataset.slot);
+                var data = Storage.loadPattern(slot);
+                if (data) {
+                    pattern = data.pattern.map(function(r) { return r.slice(); });
+                    updateGridUI();
+                    buildStepNumbers();
+                    showNotification('Loaded: ' + (data.name || 'Slot ' + (slot + 1)), '#00ff88');
+                } else {
+                    showNotification('Slot ' + (slot + 1) + ' is empty', '#ff6600');
+                }
+            });
+        });
+        
+        document.querySelectorAll('.del-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                var slot = parseInt(e.target.closest('.save-slot').dataset.slot);
+                Storage.deletePattern(slot);
+                updateSaveSlots();
+                showNotification('Slot ' + (slot + 1) + ' cleared', '#ff00aa');
+            });
+        });
+        
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            var name = prompt('Export pattern name:', 'My Pattern');
+            if (name !== null) {
+                var json = Storage.exportPattern(pattern, name || 'My Pattern');
+                var blob = new Blob([json], {type: 'application/json'});
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = (name || 'pattern') + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('Pattern exported', '#00ff88');
+            }
+        });
+        
+        document.getElementById('importBtn').addEventListener('click', function() {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    var data = Storage.importPattern(ev.target.result);
+                    if (data && data.pattern) {
+                        pattern = data.pattern.map(function(r) { return r.slice(); });
+                        updateGridUI();
+                        buildStepNumbers();
+                        showNotification('Imported: ' + (data.name || 'Pattern'), '#00ff88');
+                    } else {
+                        showNotification('Invalid pattern file', '#ff6600');
+                    }
+                };
+                reader.readAsText(file);
+            });
+            input.click();
+        });
+    }
+    
+    function updateSaveSlots() {
+        var allPatterns = Storage.getAllPatterns();
+        document.querySelectorAll('.save-slot').forEach(function(slotEl) {
+            var slot = parseInt(slotEl.dataset.slot);
+            var nameEl = slotEl.querySelector('.save-slot-name');
+            var previewEl = slotEl.querySelector('.save-slot-preview');
+            var data = allPatterns[slot];
+            
+            if (data) {
+                slotEl.classList.add('filled');
+                nameEl.textContent = data.name || 'Slot ' + (slot + 1);
+                var count = data.pattern.reduce(function(sum, row) {
+                    return sum + row.filter(function(cell) { return cell; }).length;
+                }, 0);
+                var time = data.savedAt ? new Date(data.savedAt).toLocaleDateString() : '';
+                previewEl.textContent = count + ' notes' + (time ? ' · ' + time : '');
+            } else {
+                slotEl.classList.remove('filled');
+                nameEl.textContent = 'SLOT ' + (slot + 1);
+                previewEl.textContent = 'Empty';
+            }
+        });
     }
     
     waitForLibraries(initApp);
