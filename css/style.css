@@ -956,6 +956,47 @@ button:active {
 
 .stop-btn { border-color: var(--neon-pink); }
 .clear-btn { border-color: var(--neon-purple); }
+.tap-btn-master {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 5px 14px;
+    border: 1px solid var(--neon-green);
+    border-radius: 50px;
+    background: rgba(0, 255, 136, 0.08);
+    color: var(--neon-green);
+    cursor: pointer;
+    transition: all 0.1s ease;
+    position: relative;
+    overflow: hidden;
+}
+.tap-btn-master:hover {
+    background: rgba(0, 255, 136, 0.18);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+.tap-btn-master:active {
+    background: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+    transform: scale(0.95);
+}
+.tap-flash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(0, 255, 136, 0.3);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: none;
+}
+.tap-flash.active {
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
 .mixer-btn { border-color: var(--neon-cyan); }
 .fx-btn { border-color: var(--neon-purple); }
 
@@ -1074,6 +1115,116 @@ footer {
     color: rgba(255, 255, 255, 0.3);
     margin-top: 1.2rem;
     letter-spacing: 1px;
+}
+
+.save-section {
+    margin-top: 1.2rem;
+    padding: 1rem 1.2rem;
+    background: rgba(0, 255, 136, 0.03);
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    border-radius: 16px;
+}
+
+.save-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--neon-green);
+    margin-bottom: 0.8rem;
+}
+
+.save-header-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.export-btn, .import-btn {
+    background: none;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    color: var(--neon-green);
+    padding: 4px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+}
+
+.export-btn:hover, .import-btn:hover {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
+}
+
+.save-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.save-slot {
+    background: rgba(0, 255, 136, 0.04);
+    border: 1px solid rgba(0, 255, 136, 0.12);
+    border-radius: 12px;
+    padding: 8px 10px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.save-slot:hover {
+    border-color: rgba(0, 255, 136, 0.35);
+    background: rgba(0, 255, 136, 0.06);
+}
+
+.save-slot.filled {
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.save-slot-name {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(0, 255, 136, 0.5);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.save-slot-preview {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.save-slot-actions {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.save-slot-actions button {
+    background: none;
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    color: var(--neon-green);
+    padding: 2px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.15s;
+}
+
+.save-slot-actions button:hover {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: var(--neon-green);
+}
+
+@media (max-width: 700px) {
+    .save-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .sound-picker-modal {
